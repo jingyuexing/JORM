@@ -1,5 +1,7 @@
 package org.jingyuexing.annotation;
 
+import org.jingyuexing.Types.JoinType;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -10,5 +12,5 @@ import java.lang.annotation.Target;
 public @interface Join {
     Class table();
 
-    String joinType() default "inner";
+    JoinType joinType() default JoinType.SELF;
 }

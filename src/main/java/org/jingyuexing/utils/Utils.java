@@ -1,9 +1,11 @@
 package org.jingyuexing.utils;
 
+import org.jingyuexing.Types.JoinType;
 import org.jingyuexing.Types.LogicalOperator;
 import org.jingyuexing.Types.MySQLType;
 import org.jingyuexing.Types.OrderType;
 import org.jingyuexing.annotation.Column;
+import org.jingyuexing.annotation.Join;
 import org.jingyuexing.annotation.Table;
 
 import java.lang.reflect.Field;
@@ -112,7 +114,7 @@ public class Utils {
             field.setAccessible(true);
             Utils.listAppend(keys, field.getName());
             if(field.get(entity) instanceof String){
-                Utils.listAppend(values, Utils.join("", "\"",String.valueOf(field.get(entity)),"\""));
+                Utils.listAppend(values, Utils.join("", "`",String.valueOf(field.get(entity)),"`"));
 
             }else{
                 Utils.listAppend(values, String.valueOf(field.get(entity)));
@@ -148,10 +150,12 @@ public class Utils {
 
     }
     public static String primaryKey(ArrayList<String> cols){
-        if(cols.size() <=  1){
+        if(cols.size() ==  1){
             return Utils.join(Utils.space,"primary","key",Utils.join("", cols));
-        }else{
+        }else if(cols.size() > 1){
             return Utils.join(Utils.space,"primary","key","(",Utils.join(",", cols),")");
+        }else{
+            return "";
         }
     }
 
@@ -161,8 +165,22 @@ public class Utils {
         return Utils.join(Utils.space, updateStatement);
     }
 
+    public static String Update(Class<?> clazz, String... fields) throws Exception {
+        ArrayList<String> strings = new ArrayList<>();
+        for (Field field : clazz.getDeclaredFields()) {
+            field.setAccessible(true); // Ensure that the field can be accessed
+            String[] col = new String[] { field.getName(), String.valueOf(field.get(clazz)) }; // Use reflection to get
+                                                                                               // the field value
+            strings.add(String.join("=", col));
+        }
+        return Utils.join(Utils.space, strings);
+    }
+
     public static String eof(String statement) {
         return Utils.join(Utils.space, statement, ";");
+    }
+    public static  ArrayList<String> eof(ArrayList<String> statement){
+        return  Utils.listAppend(statement,";");
     }
 
     public static String between(LogicalOperator op, Object begin, Object end) {
@@ -203,7 +221,7 @@ public class Utils {
         return String.join(Utils.space, strings);
     }
 
-    public static String select(String... cols) {
+    public static String selectByArray(String... cols) {
         ArrayList<String> strings = new ArrayList<>();
         strings.add("select");
         strings.add(Utils.ColumnsJoin(cols));
@@ -211,7 +229,7 @@ public class Utils {
         return String.join(Utils.space, strings);
     }
 
-    public static String select(ArrayList<String> cols) {
+    public static String selectByList(ArrayList<String> cols) {
         ArrayList<String> strings = new ArrayList<>();
         strings.add("select");
         strings.add(Utils.ColumnsJoin(cols));
@@ -219,10 +237,10 @@ public class Utils {
         return String.join(Utils.space, strings);
     }
 
-    public static ArrayList<String> select(Class<?> clazz) {
-        Class<?> class_ = clazz;
+    public static <T> ArrayList<String> selectByInstance(T clazz) {
+        Class<?> class_ = clazz.getClass();
         ArrayList<String> selectedCols = new ArrayList<>();
-        for (Field field : clazz.getDeclaredFields()) {
+        for (Field field : class_.getDeclaredFields()) {
             selectedCols.add(field.getName());
         }
         return selectedCols;
@@ -239,6 +257,7 @@ public class Utils {
         }
         return String.join("", strings);
     }
+
 
     public static String ColumnsJoin(ArrayList<String> cols) {
         ArrayList<String> strings = new ArrayList<>();
@@ -257,16 +276,6 @@ public class Utils {
         return Utils.join(Utils.space, "alter", "table", tablename);
     }
 
-    public static String update(Class<?> clazz, String... where) throws Exception {
-        ArrayList<String> strings = new ArrayList<>();
-        for (Field field : clazz.getDeclaredFields()) {
-            field.setAccessible(true); // Ensure that the field can be accessed
-            String[] col = new String[] { field.getName(), String.valueOf(field.get(clazz)) }; // Use reflection to get
-                                                                                               // the field value
-            strings.add(String.join("=", col));
-        }
-        return Utils.join(Utils.space, strings);
-    }
 
     public static String template(String template, String delimiter, Object... values) {
         String tempCopy = template;
@@ -303,9 +312,19 @@ public class Utils {
     public static String count(String... columns) {
         return Utils.buildInMethod("count", columns);
     }
+    public static  String count(ArrayList<String> columns){
+        return Utils.buildInMethod("count",columns);
+    }
 
     public static String buildInMethod(String name, String... columns) {
         if (columns.length != 0) {
+            return Utils.join("", name, "(", Utils.join(",", columns), ")");
+        } else {
+            return Utils.join("", name, "(", "*", ")");
+        }
+    }
+    public static String buildInMethod(String name, ArrayList<String> columns) {
+        if (columns.size() != 0) {
             return Utils.join("", name, "(", Utils.join(",", columns), ")");
         } else {
             return Utils.join("", name, "(", "*", ")");
@@ -328,13 +347,6 @@ public class Utils {
         return Utils.join(Utils.space, "constraint",Utils.unique(cols));
     }
 
-    public static String crossJoin(String... tables) {
-        return Utils.join(" cross join ", tables);
-    }
-
-    public static String leftJoin(String... tables) {
-        return Utils.join(" left join ", tables);
-    }
 
     public static String createTable(String name){
         return Utils.create(name,"table");
@@ -346,12 +358,32 @@ public class Utils {
     public static String create(String name,String type){
         return Utils.join(Utils.space, "create",type,name);
     }
-    public static String rightJoin(String... tables) {
-        return Utils.join(" right join ", tables);
+    public static String crossJoin(String... tables) {
+        return Utils.join(Utils.join(Utils.space,JoinType.CROSS.getValue(),"join"), tables);
     }
 
+    public static String leftJoin(String... tables) {
+        return Utils.join(Utils.join(Utils.space,JoinType.LEFT.getValue(),"join"), tables);
+    }
+    public static String rightJoin(String... tables) {
+        return Utils.join(Utils.join(Utils.space,JoinType.RIGHT.getValue(),"join"), tables);
+    }
+    public static String fullJoin(String... tables) {
+        return Utils.join(Utils.join(Utils.space,JoinType.FULL.getValue(),"outer","join"), tables);
+    }
+    public static String selfJoin(String... tables) {
+        ArrayList<String> list = new ArrayList<>();
+        int start = 10;
+        for (String item : tables) {
+            Utils.listAppend(list, Utils.join(Utils.space, item, Utils.join("","J",Integer.toHexString(start).toUpperCase())));
+            start ++;
+        }
+        return Utils.join(",", list);
+    }
+
+
     public static String innerJoin(String... tables) {
-        return Utils.join(" inner join ", tables);
+        return Utils.join(Utils.join(Utils.space,JoinType.INNER.getValue(),"join"), tables);
     }
 
     public static String JoinOn(String... expression) {
@@ -365,13 +397,11 @@ public class Utils {
     public static String Enum(Object... vals) {
         ArrayList<String> strings = new ArrayList<>();
         ArrayList<String> Evals = new ArrayList<>();
-        strings.add("enum");
-        strings.add("(");
+        Utils.listAppend(strings,"enum","(");
         for (Object val : vals) {
             Evals.add(String.valueOf(val));
         }
-        strings.add(Utils.join(",", Evals));
-        strings.add(")");
+        Utils.listAppend(strings,Utils.join(",",Evals),")");
         return Utils.join("", strings);
     }
 
