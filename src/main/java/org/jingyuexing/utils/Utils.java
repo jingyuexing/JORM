@@ -222,14 +222,6 @@ public class Utils {
         return String.join(delimiter, vals);
     }
     public static String SubStatement(String prev, String next,LogicalOperator op){
-        ArrayList<String> subStatementPrev = new ArrayList<>();
-        subStatementPrev.add("(");
-        subStatementPrev.add(prev);
-        subStatementPrev.add(")");
-        ArrayList<String> subStatementNext = new ArrayList<>();
-        subStatementNext.add("(");
-        subStatementNext.add(next);
-        subStatementNext.add(")");
-        return Utils.join(Utils.join("", " ",op.getValue()," "), Utils.join(" ", subStatementPrev),Utils.join(" ", subStatementNext));
+        return Utils.join(Utils.join("", " ",op.getValue()," "), Utils.join(" ", "(",prev,")"),Utils.join(" ","(",next,")"));
     }
 }
