@@ -107,7 +107,12 @@ public class Utils {
         for (Field field : clazz.getDeclaredFields()) {
             field.setAccessible(true);
             Utils.listAppend(keys, field.getName());
-            Utils.listAppend(values, String.valueOf(field.get(entity)));
+            if(field.get(entity) instanceof String){
+                Utils.listAppend(values, Utils.join("", "\"",String.valueOf(field.get(entity)),"\""));
+
+            }else{
+                Utils.listAppend(values, String.valueOf(field.get(entity)));
+            }
         }
         ArrayList<String>[] keyWithValue = new ArrayList[] { keys, values };
         return keyWithValue;
