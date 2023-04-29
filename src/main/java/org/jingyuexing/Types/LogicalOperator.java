@@ -2,7 +2,8 @@ package org.jingyuexing.Types;
 
 public enum LogicalOperator{
     AND("and"),
-    OR("OR"),
+    OR("or"),
+    IN("in"),
     MORETHAN(">="),
     GT(">="),
     NOTEQUAL("!="),

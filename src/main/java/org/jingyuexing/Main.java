@@ -46,5 +46,7 @@ class JORM{
         System.out.println(Utils.select(User.class));
         System.out.println(Utils.ignoreInSet(list,ig));
         System.out.println(Utils.ignoreInSet(Utils.select(User.class),ig));
+        System.out.println(Utils.AndSubStatement("A","B"));
+        System.out.println(Utils.ORSubStatement("this is a simple text","this another simple text"));
     }
 }

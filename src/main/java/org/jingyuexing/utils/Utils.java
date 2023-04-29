@@ -188,7 +188,7 @@ public class Utils {
         }
         strings.add(String.join(",",Evals));
         strings.add(")");
-        return String.join("",strings);
+        return Utils.join("",strings);
     }
     public static String TypeWithLength(String type,int length){
         ArrayList<String> strings = new ArrayList<>();
@@ -205,5 +205,31 @@ public class Utils {
             }
         }
         return  final_;
+    }
+    public static String AndSubStatement(String prev,String next){
+        return Utils.SubStatement(prev, next, LogicalOperator.AND);
+    }
+    public static String ORSubStatement(String prev, String next){
+        return Utils.SubStatement(prev, next, LogicalOperator.OR);
+    }
+    public static String InSubStatement(String prev, String next){
+        return Utils.SubStatement(prev, next, LogicalOperator.IN);
+    }
+    public static String join(String delimiter,String ...vals){
+        return String.join(delimiter, vals);
+    }
+    public static String join(String delimiter,ArrayList<String> vals){
+        return String.join(delimiter, vals);
+    }
+    public static String SubStatement(String prev, String next,LogicalOperator op){
+        ArrayList<String> subStatementPrev = new ArrayList<>();
+        subStatementPrev.add("(");
+        subStatementPrev.add(prev);
+        subStatementPrev.add(")");
+        ArrayList<String> subStatementNext = new ArrayList<>();
+        subStatementNext.add("(");
+        subStatementNext.add(next);
+        subStatementNext.add(")");
+        return Utils.join(Utils.join("", " ",op.getValue()," "), Utils.join(" ", subStatementPrev),Utils.join(" ", subStatementNext));
     }
 }
