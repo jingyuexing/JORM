@@ -9,7 +9,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface Table{
+    
     String name() default "";
+    
     String prefix() default "";
 
     EncodeType encode() default EncodeType.UTF8;

@@ -27,4 +27,5 @@ public @interface Column{
     boolean nullable() default true;
     String comment() default "";
     String primary() default "";
+    boolean unique() default false;
 }

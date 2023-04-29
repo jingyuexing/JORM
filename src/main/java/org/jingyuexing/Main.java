@@ -50,5 +50,41 @@ class JORM{
         System.out.println(Utils.AndSubStatement("A","B"));
         System.out.println(Utils.ORSubStatement("this is a simple text","this another simple text"));
         System.out.println(Utils.between(LogicalOperator.AND,12,33));
+        System.out.println(Utils.listAppend(new ArrayList<String>(),"12","33","45","66","72","83"));
+        System.out.println(Utils.join(" ",
+                Utils.listAppend(
+                        Utils.listAppend(
+                                new ArrayList<String>(),
+                                "select","*","from","tablename"
+                        ),
+                        Utils.listAppend(
+                                new ArrayList<>(),
+                                "where","id","=","12"
+                        ),
+                        Utils.listAppend(
+                                new ArrayList<String>(),
+                                "or","(",
+                                "子句",
+                                ")",
+                                "AND",
+                                "(",
+                                "子句",
+                                ")"
+                        )
+                )
+        )
+        );
+        ArrayList[] arrayLists = new ArrayList[2];
+        User user = new User();
+        user.username = "BOb";
+        user.address="北京什刹海";
+        user.age=33;
+        user.gender ="男";
+        user.photo = "https://www.example/images/100x100";
+        arrayLists = Utils.KeyWithValues(user);
+        System.out.println(arrayLists);
+
+        System.out.println(Utils.eof(Utils.Insert(user)));
+        System.out.println(Utils.eof(Utils.Update(user)));
     }
 }
