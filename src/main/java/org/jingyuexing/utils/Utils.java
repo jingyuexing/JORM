@@ -40,6 +40,7 @@ public class Utils {
         Utils.listAppend(SQL, Utils.createTable(tableName), "(");
 
         ArrayList<String> uniqueList = new ArrayList<>();
+        ArrayList<String> primaryKeys = new ArrayList<>();
         // Set the column names on the instance using reflection
         ArrayList<String> statementCol = new ArrayList<>();
         for (Field field : clazz.getDeclaredFields()) {
@@ -65,7 +66,9 @@ public class Utils {
                 } else {
                     Utils.listAppend(col, "not", "null");
                 }
-
+                if(column.primaryKey()){
+                    primaryKeys.add(field.getName());
+                }
                 if(column.unique()){
                     uniqueList.add(field.getName());
                 }
@@ -76,6 +79,7 @@ public class Utils {
                 statementCol.add(Utils.join(Utils.space, col));
             }
         }
+        statementCol.add(Utils.primaryKey(primaryKeys));
         statementCol.add(Utils.constraint(Utils.join("_", "UC",tableName), uniqueList));
         Utils.listAppend(SQL, Utils.join(",", statementCol));
         
@@ -142,6 +146,13 @@ public class Utils {
         }
         return Utils.join(Utils.space, "set", Utils.join(", ", setStatement));
 
+    }
+    public static String primaryKey(ArrayList<String> cols){
+        if(cols.size() <=  1){
+            return Utils.join(Utils.space,"primary","key",Utils.join("", cols));
+        }else{
+            return Utils.join(Utils.space,"primary","key","(",Utils.join(",", cols),")");
+        }
     }
 
     public static <T> String Update(T entity) throws IllegalAccessException {
