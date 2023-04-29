@@ -29,7 +29,7 @@ public class Utils {
             tableName = name[name.length-1];
         }
         if(!"".equals(table.prefix())){
-            tableName = table.prefix()+ tableName;
+            tableName = Utils.join("",table.prefix(),tableName);
         }
         StringBuilder SQL = new StringBuilder();
         SQL.append("create table ").append(tableName).append("(");
@@ -47,7 +47,7 @@ public class Utils {
                 }
                 col.add(colName);
                 if(column.type() == MySQLType.ENUM){
-                    colType = Utils.Enum(column.enums());
+                    colType = Utils.Enum((Object) column.enums());
                 }
                 if(column.length()!=0 && column.type() != MySQLType.ENUM){
                     colType = Utils.TypeWithLength(column.type().getValue(),column.length());
@@ -64,7 +64,7 @@ public class Utils {
                 statementCol.add(String.join(" ",col));
             }
         }
-        SQL.append(String.join(",",statementCol));
+        SQL.append(Utils.join(",",statementCol));
         SQL.append(")");
 
         return SQL.toString();
@@ -75,18 +75,28 @@ public class Utils {
         ArrayList<String> statement = new ArrayList<>();
         for (Field field : clazz.getDeclaredFields()) {
             field.setAccessible(true);
-            String[] col = new String[]{ field.getName(),String.valueOf(field.get(clazz))};
-            strings.add(String.join("=", col));
+            strings.add(Utils.join("=", field.getName(),String.valueOf(field.get(clazz))));
         }
         statement.add("where");
-        statement.add(String.join(op.getValue()+" ", strings));
+        statement.add(Utils.join(Utils.join("", op.getValue()," "), strings));
         return String.join(" ", statement);
     }
 
-    public static String between(LogicalOperator op, String begin, String end) {
-        StringBuilder builder = new StringBuilder();
-        String[] meta = new String[] { begin, end };
-        return builder.append("between ").append(String.join(" "+op.getValue()+" ", meta)).toString();
+    public static String between(LogicalOperator op, Object begin, Object end) {
+        return Utils.join(
+            " ",
+            "between",
+            Utils.join(
+                Utils.join(
+                    "",
+                    " ",
+                    op.getValue(),
+                    " "
+                ),
+                String.valueOf(begin),
+                String.valueOf(end)
+            )
+        );
     }
 
     public static String orderBy(OrderType order, String... cols) {
@@ -196,10 +206,13 @@ public class Utils {
         return Utils.join("",strings);
     }
     public static String TypeWithLength(String type,int length){
-        ArrayList<String> strings = new ArrayList<>();
-        strings.add(type);
-        strings.add("("+length+")");
-        return Utils.join(" ",strings);
+        return Utils.join(
+            " ",
+            type,
+            "(",
+            String.valueOf(length),
+            ")"
+        );
     }
 
     public static  ArrayList<String> ignoreInSet(ArrayList<String> set,ArrayList<String> ignores){
@@ -227,7 +240,25 @@ public class Utils {
         return String.join(delimiter, vals);
     }
     public static String SubStatement(String prev, String next,LogicalOperator op){
-        return Utils.join(Utils.join("", " ",op.getValue()," "), Utils.join(" ", "(",prev,")"),Utils.join(" ","(",next,")"));
+        return Utils.join(
+            Utils.join(
+                "",
+                " ",
+                op.getValue(),
+                " "
+            ),
+            Utils.join(" ",
+                "(",
+                prev,
+                ")"
+            ),
+            Utils.join(
+                " ",
+                "(",
+                next,
+                ")"
+            )
+        );
     }
 
     public static <T> T map2Class(Map<String, Object> map, Class<T> clazz) throws IllegalAccessException, InstantiationException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {

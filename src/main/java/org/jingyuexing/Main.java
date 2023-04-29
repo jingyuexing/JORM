@@ -1,5 +1,6 @@
 package org.jingyuexing;
 
+import org.jingyuexing.Types.LogicalOperator;
 import org.jingyuexing.annotation.Column;
 import org.jingyuexing.Types.MySQLType;
 import org.jingyuexing.Types.OrderType;
@@ -48,5 +49,6 @@ class JORM{
         System.out.println(Utils.ignoreInSet(Utils.select(User.class),ig));
         System.out.println(Utils.AndSubStatement("A","B"));
         System.out.println(Utils.ORSubStatement("this is a simple text","this another simple text"));
+        System.out.println(Utils.between(LogicalOperator.AND,12,33));
     }
 }
