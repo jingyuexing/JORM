@@ -7,6 +7,7 @@ import org.jingyuexing.annotation.Column;
 import org.jingyuexing.annotation.Table;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -229,8 +230,8 @@ public class Utils {
         return Utils.join(Utils.join("", " ",op.getValue()," "), Utils.join(" ", "(",prev,")"),Utils.join(" ","(",next,")"));
     }
 
-    public static <T> T map2Class(Map<String, Object> map, Class<T> clazz) throws IllegalAccessException, InstantiationException {
-        T instance = clazz.newInstance();
+    public static <T> T map2Class(Map<String, Object> map, Class<T> clazz) throws IllegalAccessException, InstantiationException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+        T instance = clazz.getDeclaredConstructor().newInstance();
         for (Field field : clazz.getDeclaredFields()) {
             field.setAccessible(true);
             if (map.containsKey(field.getName())) {
