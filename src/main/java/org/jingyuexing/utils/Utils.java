@@ -8,8 +8,12 @@ import org.jingyuexing.annotation.Table;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Map;
 
 public class Utils {
+    private Utils(){
+
+    }
     public static <T> String create(Class<T> clazz) throws Exception {
         // Check if the class has the Table annotation
         if (!clazz.isAnnotationPresent(Table.class)) {
@@ -148,7 +152,7 @@ public class Utils {
             strings.add(String.join(",", cols));
             strings.add(")");
         }
-        return String.join("",strings);
+        return Utils.join("",strings);
     }
 
     public static String alter(String tablename) {
@@ -156,7 +160,7 @@ public class Utils {
         strings.add("alter");
         strings.add("table");
         strings.add(tablename);
-        return String.join(" ", strings);
+        return Utils.join(" ", strings);
     }
 
     public static String update(Class<?> clazz, String... where) throws Exception {
@@ -167,7 +171,7 @@ public class Utils {
                                                                                                // the field value
             strings.add(String.join("=", col));
         }
-        return String.join(" ", strings);
+        return Utils.join(" ", strings);
     }
 
     public static String template(String template,String delimiter, Object ...values){
@@ -186,7 +190,7 @@ public class Utils {
         for (Object val : vals) {
             Evals.add(String.valueOf(val));
         }
-        strings.add(String.join(",",Evals));
+        strings.add(Utils.join(",",Evals));
         strings.add(")");
         return Utils.join("",strings);
     }
@@ -194,7 +198,7 @@ public class Utils {
         ArrayList<String> strings = new ArrayList<>();
         strings.add(type);
         strings.add("("+length+")");
-        return String.join(" ",strings);
+        return Utils.join(" ",strings);
     }
 
     public static  ArrayList<String> ignoreInSet(ArrayList<String> set,ArrayList<String> ignores){
@@ -223,5 +227,16 @@ public class Utils {
     }
     public static String SubStatement(String prev, String next,LogicalOperator op){
         return Utils.join(Utils.join("", " ",op.getValue()," "), Utils.join(" ", "(",prev,")"),Utils.join(" ","(",next,")"));
+    }
+
+    public static <T> T map2Class(Map<String, Object> map, Class<T> clazz) throws IllegalAccessException, InstantiationException {
+        T instance = clazz.newInstance();
+        for (Field field : clazz.getDeclaredFields()) {
+            field.setAccessible(true);
+            if (map.containsKey(field.getName())) {
+                field.set(instance, map.get(field.getName()));
+            }
+        }
+        return instance;
     }
 }
